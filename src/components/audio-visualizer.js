@@ -49,9 +49,9 @@ class AudioVisualizer extends PureComponent {
                     width: (boxWidth - padding) / 2,
                     color: '#E65721', // default face color
                     leftFace: '#BB241B',
-                    rightFace: '#BB241B',
-                    topFace: '#99ADFF',
-                    bottomFace: '#99ADFF',
+                    rightFace: '#f5a42a',
+                    topFace: '#f5a42a',
+                    bottomFace: '#f5a42a',
                     translate: { x: start + boxWidth * i },
                     rotate: {y: 0}
                 });
@@ -88,7 +88,6 @@ class AudioVisualizer extends PureComponent {
         // }
 
 
-        let audioStream;
         let mediaRecorder;
         const constraints = { audio: true };
 
@@ -98,19 +97,22 @@ class AudioVisualizer extends PureComponent {
         }
 
         const onSuccess = (stream) => {
-            audioStream = stream;
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.start();
+            // mediaRecorder = new MediaRecorder(stream);
+            // mediaRecorder.start();
 
-            mediaRecorder.onstop = function(e) {
-                console.log("data available after MediaRecorder.stop() called.");
-            }
+            // mediaRecorder.onstop = function(e) {
+            //     console.log("data available after MediaRecorder.stop() called.");
+            // }
 
-            // Fired when the media recorder actually starts recording
-            mediaRecorder.onstart = () => {
+            // // Fired when the media recorder actually starts recording
+            // mediaRecorder.onstart = () => {
 
-                const context = new AudioContext();
-                const source = context.createMediaStreamSource(audioStream);
+                let AudioContext = window.AudioContext // Default
+                  || window.webkitAudioContext // Safari and old versions of Chrome
+                  || false
+                if (!AudioContext) alert('Your browser not supported') 
+                const context = new AudioContext()
+                const source = context.createMediaStreamSource(stream);
                 Meyda.windowing(source, "hamming");
 
                 const analyzer = Meyda.createMeydaAnalyzer({
@@ -134,11 +136,12 @@ class AudioVisualizer extends PureComponent {
                 this.renderCanvas();
 
 
-            }
+            // }
 
         }
 
         // Ask for permission to start recording
+        // onSuccess(this.props.stream)
         navigator.mediaDevices.getUserMedia(constraints).then(onSuccess.bind(this), onError);
 
     }
@@ -150,9 +153,7 @@ class AudioVisualizer extends PureComponent {
             <div style={classes['wav']}>
                 <div style={classes['wav-content']}>
                     {isLoading ? (
-                        <h2>
-                            Listening for sounds
-                </h2>
+                        <span>...</span>
                     ) : (
                             <canvas className="zdog-canvas" style={classes['zdog-canvas']}>
                             </canvas>

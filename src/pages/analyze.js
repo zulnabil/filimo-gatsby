@@ -191,8 +191,7 @@ const Child = posed.div({
 const getMedia = async () => {
   try {
     return await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: false,
+      audio: true
     })
   } catch (err) {
     console.log("Error:", err)
@@ -259,21 +258,21 @@ const AnalyzePage = () => {
     let output = arr.indexOf(Math.max(...arr))
     switch (output) {
       case 0:
-        return 'Female Angry'
+        return 'Angry'
       case 1:
-        return 'Female Happy'
-      case 2:
-        return 'Female Neutral'
-      case 3:
-        return 'Female Sad'
-      case 4:
-        return 'Male Angry'
-      case 5:
-        return 'Male Happy'
-      case 6:
-        return 'Male Neutral'
-      case 7:
-        return 'Male Sad'
+        return 'Neutral'
+      // case 2:
+      //   return 'Female Neutral'
+      // case 3:
+      //   return 'Female Sad'
+      // case 4:
+      //   return 'Male Angry'
+      // case 5:
+      //   return 'Male Happy'
+      // case 6:
+      //   return 'Male Neutral'
+      // case 7:
+      //   return 'Male Sad'
     }
   }
 
@@ -284,19 +283,18 @@ const AnalyzePage = () => {
     }
   }, [analyzer])
 
+  const [stream, setStream] = React.useState(null)
+  const [context, setContext] = React.useState(null)
+  const [source, setSource] = React.useState(null)
   const [clicked, setClicked] = React.useState(false)
   const [result, setResult] = React.useState(null)
   const [textResult, setTextResult] = React.useState("")
   const [textDesc, setTextDesc] = React.useState(
     "Tekan tombol rekam untuk mengenali emosi."
   )
-  const emptyLoudnessArray = new Array(24).fill(0);
-  const [loudness, setLoudness] = React.useState({ total: 0, specific: emptyLoudnessArray })
-  const [spectralCentroid, setSpectralCentroid] = React.useState(0)
 
-  const handleClick = async () => {
-    setClicked(!clicked)
-    if (!clicked) {
+  React.useEffect(() => {
+    getMedia().then(stream => {
       let AudioContext = window.AudioContext // Default
         || window.webkitAudioContext // Safari and old versions of Chrome
         || false
@@ -305,24 +303,29 @@ const AnalyzePage = () => {
       audioContext.resume().then(() => {
         console.log("Playback resumed successfully")
       })
-      getMedia().then(stream => {
-        const source = audioContext.createMediaStreamSource(stream)
-        setAnalyzer(
-          Meyda.createMeydaAnalyzer({
-            audioContext: audioContext,
-            source: source,
-            bufferSize: 512,
-            featureExtractors: ["mfcc"],
-            callback: features => {
-              // mfccBulk.concat(features.mfcc)
-              setMfccTotal(curr => curr.concat([features.mfcc]))
-              // console.log('meyda initialized')
-              // console.log(features.mfcc)
-            },
-          })
-        )
-      })
-      // analyzer.start()
+      setStream(stream)
+      setContext(audioContext)
+      setSource(audioContext.createMediaStreamSource(stream))
+    })
+  }, [])
+
+  const handleClick = async () => {
+    setClicked(!clicked)
+    if (!clicked) {
+      setAnalyzer(
+        Meyda.createMeydaAnalyzer({
+          audioContext: context,
+          source: source,
+          bufferSize: 512,
+          featureExtractors: ["mfcc"],
+          callback: features => {
+            // mfccBulk.concat(features.mfcc)
+            setMfccTotal(curr => curr.concat([features.mfcc]))
+            // console.log('meyda initialized')
+            // console.log(features.mfcc)
+          },
+        })
+      )
       setTextDesc("Tekan stop untuk mulai menganalisis.")
       setTextResult("Merekam...")
     } else {
@@ -368,7 +371,7 @@ const AnalyzePage = () => {
       <SEO title="Analyze" />
       <Child>
         <AudioVisualizer>
-          <AnimateAudioVisualizer />
+          {stream ? (<AnimateAudioVisualizer />) : null}
           <ChildAudioVisualizer />
         </AudioVisualizer>
       </Child>
