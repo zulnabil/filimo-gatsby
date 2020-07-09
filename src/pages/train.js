@@ -95,7 +95,6 @@ function Train() {
 
   const handleTrainAll = (index = 0) => {
     // for (let i in files) {
-    s
       console.log(
         `[${parseFloat(index) + 1}/${files.length}] Mengekstrak fitur MFCC`
       )

@@ -13,6 +13,7 @@ import Meyda from "meyda"
 import Layout from "../components/layout"
 import SEO from "../components/seo"
 import ButtonMediumOrange from "../components/button-medium-orange"
+import AnimateAudioVisualizer from '../components/audio-visualizer'
 
 const AudioVisualizer = styled.div`
   position: relative;
@@ -315,7 +316,7 @@ const AnalyzePage = () => {
             callback: features => {
               // mfccBulk.concat(features.mfcc)
               setMfccTotal(curr => curr.concat([features.mfcc]))
-              console.log('meyda initialized')
+              // console.log('meyda initialized')
               // console.log(features.mfcc)
             },
           })
@@ -367,6 +368,7 @@ const AnalyzePage = () => {
       <SEO title="Analyze" />
       <Child>
         <AudioVisualizer>
+          <AnimateAudioVisualizer />
           <ChildAudioVisualizer />
         </AudioVisualizer>
       </Child>
